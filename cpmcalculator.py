@@ -155,57 +155,56 @@ def get_city_data(codes):
     page_html = requests.get(url)
     if page_html.status_code == 200:
         return page_html.content
-    raise Exception('Some error here about not getting a successful response')
+    raise Exception('We are unable to query the mileage data at the moment, sorry.')
 
-#returns the miles as an int from HTML Parse
+#returns the miles as an int from HTML parse
 def get_miles_from_html(page_html):
     page_extract = soup(page_html, "html.parser")
     try:
         table_data = page_extract.find("table", attrs={"class": "table_bg"})
         flight_mileage = re.search('[0-9]+', table_data.findAll("td")[-2].text)
-        #Returns the mileage value as a double from the webpage's table
     except AttributeError:
         raise sys.exit("Error, your airport codes could not be validated")
     else:
         return int(flight_mileage.group())
 
-#prompts the user for a flight cost as an int
+#checks for a properly formatted flight cost
 def get_flight_cost(flight_cost_input):
     valid_flight_cost = flight_cost_input.strip('$')
-    if len(valid_flight_cost) < 1:
+    if len(valid_flight_cost) <= 1:
         print("Please input a flight price greater than $10")
         sys.exit(1)
-    elif len(valid_flight_cost) > 100000:
-        print("Please input a flight price less than $100,000")
+    elif len(valid_flight_cost) >= 4:
+        print("Please input a flight price less than $1,000")
         sys.exit(1)
     elif not validate_flight_cost(valid_flight_cost):
         print("Please use only whole numbers with no symbols or commas")
         sys.exit(1)
-    print("-- Flight cost received: ${}".format(valid_flight_cost))
+    print("-- Flight cost stored: ${}".format(valid_flight_cost))
     return valid_flight_cost
 
-#returns the airline if the airline input matches Delta, United, or American
+#returns the airline if the airline input matches values; Delta, United, or American
 def get_airline(airline_input):
     valid_airline_name = airline_input.capitalize()
     if not validate_airline(valid_airline_name):
         print("Please input either; Delta, United, or American")
         sys.exit(1)
-    print("-- Airline name received: {}".format(valid_airline_name))
+    print("-- Airline name stored: {}".format(valid_airline_name))
     return valid_airline_name
 
-#returns fare class character to later lookup the corresponding value in the FARE_CLASS_MULTIPLIER_DICTIONARY
+#returns fare class character [key] to later lookup the corresponding values in FARE_CLASS_MULTIPLIER_DICTIONARY
 def get_fare_class(fare_class_input):
     fare_class = fare_class_input.upper()
     if len(fare_class) != 1:
-        print("You may only enter a single letter for your fare class; e.g. K")
+        print("You may only enter a single letter for your fare class; i.e. K")
         sys.exit(1)
     elif not validate_fare_class(fare_class):
         print("You may only enter one character A-Z")
         sys.exit(1)
-    print("-- Fare code received: {}".format(fare_class))
+    print("-- Fare code stored: {}".format(fare_class))
     return fare_class
 
-#returns multiplier as a float from FARE_CLASS_MULTIPLIER_DICTIONARY
+#returns fare class multiplier as a float from FARE_CLASS_MULTIPLIER_DICTIONARY
 def get_from_airline_dict(valid_airline_name, fare_class):
     multiplier = FARE_CLASS_MULTIPLIER_DICTIONARY[valid_airline_name][fare_class]
     if multiplier is None:
@@ -214,11 +213,10 @@ def get_from_airline_dict(valid_airline_name, fare_class):
         sys.exit(1)
     return multiplier
 
-#calculates the EQM's to be earned by taking fare cost, mulitplier, and distance
+#calculates the EQM's to be earned by passing in fare cost, mulitplier, and distance
 def get_CPM_calculation(multiplier, valid_flight_cost, flight_mileage):
     cpm = ((int(valid_flight_cost) / int(flight_mileage)) * int(multiplier)) * 100
     elite_miles_earned = int(flight_mileage) * int(multiplier)
-    str(elite_miles_earned)
     if cpm == 0:
         print("Your CPM could not be calculated")
     elif valid_airline_name == 'Delta':
@@ -244,7 +242,7 @@ if __name__ == '__main__':
     codes = get_codes(airport_user_input)
     page_html = get_city_data(codes)
     flight_mileage = get_miles_from_html(page_html)
-    flight_cost_input = input("What is the cost of the flight as a whole number (i.e. 425)? ")
+    flight_cost_input = input("What's the round-trip cost as a whole number with no symbols (i.e. 425)? ")
     valid_flight_cost = get_flight_cost(flight_cost_input)
     airline_input = input("Are you flying Delta, United, or American? ")
     valid_airline_name = get_airline(airline_input)
