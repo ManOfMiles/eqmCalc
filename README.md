@@ -1,7 +1,9 @@
+*Writen in Python 3.6*
+
 Inputs:
 Airport codes: At least two, no more than five. Must be three letters, comma separated.
 Flight cost: Must be greater than $10 but less than $1,000.
-Airline: Choices are; American, Delta, and United.
+Airline: Choices are; American, Delta, or United.
 Fare Class Code: This is represented as a single letter, not all letters are used by all airlines.
 
 
@@ -11,7 +13,7 @@ EQM stands for Elite Qualifying Miles, these are miles earned by flying on an ai
 EQMs are not the same as 'award miles', award miles are miles earned based on the cost of the ticket and are redeemed for 'free flights'.
 EQMs are not redeemable miles, rather they are miles that accumulate towards earning elite status with a given airline.
 
-An example elite status is Delta 'Silver Medallion', you'd need to earn 25,000 EQMs (Delta calls them MQMs) in a single calendar year to qualify. 
+An example elite status is Delta 'Silver Medallion', you'd need to earn 25,000 EQMs (Delta refers to them as MQMs) in a single calendar year to qualify. 
 
 Based on the fare class code "letter" of the specific flight booked, an airline will credit you EQMs based on the actual flight distance 
 multiplied by the fare class multiplier. The fare class multiplier can range from 0x (basic economy) up to 3x (First Class)
