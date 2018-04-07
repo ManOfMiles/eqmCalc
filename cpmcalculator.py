@@ -257,7 +257,7 @@ if __name__ == '__main__':
     valid_flight_cost = get_flight_cost(flight_cost_input)
     airline_input = input("Are you flying Delta, United, or American? ")
     valid_airline_name = get_airline(airline_input)
-    fare_class_input = input("What is your fare class code? ")
+    fare_class_input = input("What is your fare class code? i.e: N ")
     fare_class = get_fare_class(fare_class_input)
     flight_mileage = get_miles_from_html(page_html)
     multiplier = get_from_airline_dict(valid_airline_name, fare_class)
