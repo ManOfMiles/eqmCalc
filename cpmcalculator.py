@@ -1,5 +1,5 @@
 from urllib.request import urlopen as uReq
-from bs4 import BeautifulSoup as soup
+from bs4 import BeautifulSoup as Soup
 from functools import reduce
 import operator
 import re
@@ -13,90 +13,91 @@ AIRLINE = re.compile('^(delta|united|american)$', re.IGNORECASE)
 FARE_CLASS = re.compile('^[A-Za-z]{1}$')
 URL = "http://www.webflyer.com/travel/mileage_calculator/getmileage.php?{url_params}"
 FARE_CLASS_MULTIPLIER_DICTIONARY = {
-'Delta':    {
-  'N': 0,
+'Delta':
+    {
+      'N': 0,
 
-  'E': 1,
-  'H': 1,
-  'K': 1,
-  'L': 1,
-  'M': 1,
-  'Q': 1,
-  'S': 1,
-  'T': 1,
-  'U': 1,
-  'V': 1,
-  'W': 1,
-  'X': 1,
+      'E': 1,
+      'H': 1,
+      'K': 1,
+      'L': 1,
+      'M': 1,
+      'Q': 1,
+      'S': 1,
+      'T': 1,
+      'U': 1,
+      'V': 1,
+      'W': 1,
+      'X': 1,
 
-  'A': 1.5,
-  'B': 1.5,
-  'C': 1.5,
-  'D': 1.5,
-  'G': 1.5,
-  'I': 1.5,
-  'P': 1.5,
-  'Y': 1.5,
-  'Z': 1.5,
+      'A': 1.5,
+      'B': 1.5,
+      'C': 1.5,
+      'D': 1.5,
+      'G': 1.5,
+      'I': 1.5,
+      'P': 1.5,
+      'Y': 1.5,
+      'Z': 1.5,
 
-  'F': 2,
-  'J': 2,
-            },
+      'F': 2,
+      'J': 2,
+    },
+'United':
+    {
+      'N': 0,
 
-'United':   {
-  'N': 0,
+      'M': 1,
+      'E': 1,
+      'U': 1,
+      'H': 1,
+      'Q': 1,
+      'V': 1,
+      'W': 1,
+      'S': 1,
+      'T': 1,
+      'L': 1,
+      'K': 1,
+      'G': 1,
 
-  'M': 1,
-  'E': 1,
-  'U': 1,
-  'H': 1,
-  'Q': 1,
-  'V': 1,
-  'W': 1,
-  'S': 1,
-  'T': 1,
-  'L': 1,
-  'K': 1,
-  'G': 1,
+      'Y': 1.5,
+      'B': 1.5,
 
-  'Y': 1.5,
-  'B': 1.5,
+      'A': 2,
+      'C': 2,
+      'D': 2,
+      'Z': 2,
+      'P': 2,
+      'F': 3,
+      'J': 3,
+    },
+'American':
+    {
+      'B': 0,
 
-  'A': 2,
-  'C': 2,
-  'D': 2,
-  'Z': 2,
-  'P': 2,
-  'F': 3,
-  'J': 3,
-            },
+      'H': 1,
+      'K': 1,
+      'M': 1,
+      'L': 1,
+      'V': 1,
+      'G': 1,
+      'S': 1,
+      'N': 1,
+      'Q': 1,
+      'O': 1,
 
-'American': {
-  'B': 0,
+      'Y': 1.5,
+      'W': 1.5,
+      'P': 1.5,
 
-  'H': 1,
-  'K': 1,
-  'M': 1,
-  'L': 1,
-  'V': 1,
-  'G': 1,
-  'S': 1,
-  'N': 1,
-  'Q': 1,
-  'O': 1,
+      'A': 2,
+      'D': 2,
+      'I': 2,
+      'R': 2,
 
-  'Y': 1.5,
-  'W': 1.5,
-  'P': 1.5,
-
-  'A': 2,
-  'D': 2,
-  'I': 2,
-  'R': 2,
-
-  'F': 3,
-  'J': 3,
-            }
+      'F': 3,
+      'J': 3,
+    }
 }
 
 
@@ -132,7 +133,7 @@ def validate_fare_class(fare_class):
     return is_valid_fare_class(fare_class) and len(fare_class) == 1
 
 
-#prompts the user for their airports codes as a comma separated string
+# Prompts the user for their airports codes as a comma separated string, must be a least two, no more than five.
 def get_codes(airport_user_input):
     codes = [c.strip() for c in airport_user_input.split(',')]
     if len(codes) > 5:
@@ -148,7 +149,7 @@ def get_codes(airport_user_input):
     return codes
 
 
-#passes the collected airport codes as a URL query
+# Passes the collected airport codes as a URL query, if 200 code not returned an exception is raised.
 def get_city_data(codes):
     params = '&'.join(['city={}'.format(c) for c in codes])
     url = URL.format(url_params=params)
@@ -157,18 +158,21 @@ def get_city_data(codes):
         return page_html.content
     raise Exception('We are unable to query the mileage data at the moment, sorry.')
 
-#returns the miles as an int from HTML parse
+
+# Returns the total flight miles as an integer from the HTML parse.
 def get_miles_from_html(page_html):
-    page_extract = soup(page_html, "html.parser")
+    page_extract = Soup(page_html, "html.parser")
     try:
         table_data = page_extract.find("table", attrs={"class": "table_bg"})
+        # On the website the round-trip mileage is stored in a table, it is extracted at the -2 table index.
         flight_mileage = re.search('[0-9]+', table_data.findAll("td")[-2].text)
     except AttributeError:
         raise sys.exit("Error, your airport codes could not be validated")
     else:
         return int(flight_mileage.group())
 
-#checks for a properly formatted flight cost
+
+# Checks for a properly formatted flight cost.
 def get_flight_cost(flight_cost_input):
     valid_flight_cost = flight_cost_input.strip('$')
     if len(valid_flight_cost) <= 1:
@@ -183,7 +187,8 @@ def get_flight_cost(flight_cost_input):
     print("-- Flight cost stored: ${}".format(valid_flight_cost))
     return valid_flight_cost
 
-#returns the airline if the airline input matches values; Delta, United, or American
+
+# Returns the airline name if the input matches values; Delta, United, or American.
 def get_airline(airline_input):
     valid_airline_name = airline_input.capitalize()
     if not validate_airline(valid_airline_name):
@@ -192,7 +197,8 @@ def get_airline(airline_input):
     print("-- Airline name stored: {}".format(valid_airline_name))
     return valid_airline_name
 
-#returns fare class character [key] to later lookup the corresponding values in FARE_CLASS_MULTIPLIER_DICTIONARY
+
+# Returns fare class character [key] to later lookup the corresponding value [multiplier].
 def get_fare_class(fare_class_input):
     fare_class = fare_class_input.upper()
     if len(fare_class) != 1:
@@ -204,41 +210,46 @@ def get_fare_class(fare_class_input):
     print("-- Fare code stored: {}".format(fare_class))
     return fare_class
 
-#returns fare class multiplier as a float from FARE_CLASS_MULTIPLIER_DICTIONARY
-def get_from_airline_dict(valid_airline_name, fare_class):
-    multiplier = FARE_CLASS_MULTIPLIER_DICTIONARY[valid_airline_name][fare_class]
-    if multiplier is None:
-        print("Fare class multiplier {} on {} Airlines did not return a value"\
-              .format(fare_class, valid_airline_name))
-        sys.exit(1)
-    return multiplier
 
-#calculates the EQM's to be earned by passing in fare cost, mulitplier, and distance
-def get_CPM_calculation(multiplier, valid_flight_cost, flight_mileage):
+# Returns the fare class multiplier as a float from the nested 'multiplier' dictionary.
+def get_from_airline_dict(valid_airline_name, fare_class):
+    try:
+        multiplier = FARE_CLASS_MULTIPLIER_DICTIONARY[valid_airline_name][fare_class]
+        return multiplier
+    except KeyError:
+        print("Sorry, that fare class is not a choice for {} Airlines.".format(valid_airline_name))
+        sys.exit(1)
+
+
+# Performs calculation to determine the EQM's and CPM by passing in fare cost, multiplier, and distance.
+def get_cpm_calculation(multiplier, valid_flight_cost, flight_mileage):
+    # The flight cost is divided by the flight mileage, then multiplied by the fare class multiplier to return the CPM.
     cpm = ((int(valid_flight_cost) / int(flight_mileage)) * int(multiplier)) * 100
+    # The EQM, or elite qualifying miles,
     elite_miles_earned = int(flight_mileage) * int(multiplier)
     if cpm == 0:
-        print("Your CPM could not be calculated")
+        print("Sorry, your EQM and CPM could not be calculated")
+        sys.exit(1)
     elif valid_airline_name == 'Delta':
-        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "\
-              "on Delta Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"\
-        " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"\
-        " earns you " + ("{0:,g}".format(elite_miles_earned)) + " MQMs.")
+        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "
+              "on Delta Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"
+              " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"
+              " earns you " + ("{0:,g}".format(elite_miles_earned)) + " MQMs.")
     elif valid_airline_name == 'United':
-        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "\
-              "on United Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"\
-        " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"\
-        " earns you " + ("{0:,g}".format(elite_miles_earned)) + " PQMs.")
+        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "
+              "on United Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"
+              " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"
+              " earns you " + ("{0:,g}".format(elite_miles_earned)) + " PQMs.")
     elif valid_airline_name == 'American':
-        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "\
-              "on American Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"\
-        " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"\
-        " earns you " + ("{0:,g}".format(elite_miles_earned)) + " EQMs.")
-    return cpm
+        print("This " + str("{0:,g}".format(flight_mileage)) + " mile round-trip flight "
+              "on American Airlines in fare class: " + str(fare_class) + " = '" + str(multiplier) + "x',"
+              " which calculates at " + str(format(cpm, '.2f')) + " 'Cents Per Mile',"
+              " earns you " + ("{0:,g}".format(elite_miles_earned)) + " EQMs.")
+    sys.exit(1)
 
 
 if __name__ == '__main__':
-    airport_user_input = input("Input up to 5 airport codes (i.e. lax, jfk, lhr,...) ")
+    airport_user_input = input("Input up to 5 airport codes ( i.e. lax, jfk, lhr ) ")
     codes = get_codes(airport_user_input)
     page_html = get_city_data(codes)
     flight_mileage = get_miles_from_html(page_html)
@@ -250,5 +261,5 @@ if __name__ == '__main__':
     fare_class = get_fare_class(fare_class_input)
     flight_mileage = get_miles_from_html(page_html)
     multiplier = get_from_airline_dict(valid_airline_name, fare_class)
-    get_CPM_calculation(multiplier, valid_flight_cost, flight_mileage)
+    get_cpm_calculation(multiplier, valid_flight_cost, flight_mileage)
 
